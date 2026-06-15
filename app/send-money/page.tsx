@@ -3,8 +3,17 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { server, loadAccount } from "@/lib/stellar";
+
 import { getWalletAddress } from "@/lib/freighter";
+
+import {
+  server,
+  loadAccount,
+  TransactionBuilder,
+  Operation,
+  Asset,
+  Networks,
+} from "@/lib/stellar";
 
 export default function SendMoneyPage() {
   const router = useRouter();
@@ -36,10 +45,19 @@ export default function SendMoneyPage() {
 
   const senderAddress = await getWalletAddress();
 
-if (senderAddress?.address === destinationAddress) {
-  setMessage("You cannot send money to your own wallet");
-  return;
-}
+    if (senderAddress?.address === destinationAddress) {
+      setMessage("You cannot send money to your own wallet");
+      return;
+    }
+
+    const senderAccount = await loadAccount(
+      senderAddress.address
+    );
+
+    console.log(
+      "SENDER ACCOUNT:",
+      senderAccount
+    );
 
     console.log("DESTINATION:", destinationAddress);
 
@@ -51,6 +69,32 @@ if (senderAddress?.address === destinationAddress) {
       "DESTINATION ACCOUNT:",
       destinationAccount
     );
+
+    const transaction = new TransactionBuilder(
+  senderAccount,
+  {
+    fee: "100",
+    networkPassphrase:
+      Networks.TESTNET,
+  }
+)
+  .addOperation(
+    Operation.payment({
+      destination:
+        destinationAddress,
+      asset: Asset.native(),
+      amount:
+        amount,
+    })
+  )
+  .setTimeout(30)
+  .build();
+
+console.log(
+  "TRANSACTION:",
+  transaction
+);
+
 
     const {
       data: { session },

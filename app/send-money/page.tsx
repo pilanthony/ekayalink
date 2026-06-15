@@ -106,6 +106,18 @@ const signed = await signTransaction(
   }
 );
 
+const response = await server.submitTransaction(
+  TransactionBuilder.fromXDR(
+    signed.signedTxXdr,
+    Networks.TESTNET
+  )
+);
+
+console.log(
+  "SUBMIT RESPONSE:",
+  response
+);
+
 console.log(
   "SIGNED:",
   signed

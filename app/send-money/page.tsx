@@ -4,7 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-import { getWalletAddress } from "@/lib/freighter";
+import {
+  getWalletAddress,
+  signTransaction,
+} from "@/lib/freighter";
 
 import {
   server,
@@ -95,6 +98,18 @@ console.log(
   transaction
 );
 
+const signed = await signTransaction(
+  transaction.toXDR(),
+  {
+    networkPassphrase:
+      Networks.TESTNET,
+  }
+);
+
+console.log(
+  "SIGNED:",
+  signed
+);
 
     const {
       data: { session },

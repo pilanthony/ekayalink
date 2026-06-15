@@ -1,7 +1,10 @@
-import { 
-  requestAccess, 
-  getAddress 
+import {
+  requestAccess,
+  getAddress,
+  signTransaction
 } from "@stellar/freighter-api";
+
+
 
 export async function getWalletAddress() {
   try {
@@ -28,5 +31,8 @@ export async function connectFreighter() {
   } catch (error) {
     console.error("FREIGHTER ERROR:", error);
     return null;
+  
   }
 }
+
+    export { signTransaction };

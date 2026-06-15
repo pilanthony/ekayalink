@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { server, loadAccount } from "@/lib/stellar";
+import { getWalletAddress } from "@/lib/freighter";
 
 export default function SendMoneyPage() {
   const router = useRouter();
@@ -12,8 +13,37 @@ export default function SendMoneyPage() {
   const [message, setMessage] = useState("");
 
   const handleSendMoney = async () => {
+
+    if (!destinationAddress) {
+    setMessage("Destination wallet address is required");
+    return;
+  }
+
+  if (!amount) {
+    setMessage("Amount is required");
+    return;
+  }
+
+  if (Number(amount) <= 0) {
+    setMessage("Amount must be greater than zero");
+    return;
+  }
+
+  if (!destinationAddress.startsWith("G")) {
+    setMessage("Invalid Stellar wallet address");
+    return;
+  }
+
+  const senderAddress = await getWalletAddress();
+
+if (senderAddress?.address === destinationAddress) {
+  setMessage("You cannot send money to your own wallet");
+  return;
+}
+
     console.log("DESTINATION:", destinationAddress);
-    const destinationAccount = await loadAccount(
+
+  const destinationAccount = await loadAccount(
       destinationAddress
     );
 
@@ -86,6 +116,7 @@ export default function SendMoneyPage() {
 
         <button
           onClick={handleSendMoney}
+          disabled={!destinationAddress || !amount}
           className="w-full border rounded-lg p-3"
         >
           Send Money

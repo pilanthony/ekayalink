@@ -12,11 +12,15 @@ export default function SendMoneyPage() {
   const [message, setMessage] = useState("");
 
   const handleSendMoney = async () => {
-    const account = await loadAccount(
-      "GBCOMIMPXHBHW3WPBLFN5NQ4XQUL6XYZX3SBP7TFPK4VRPTSD4HCLJMD"
+    console.log("DESTINATION:", destinationAddress);
+    const destinationAccount = await loadAccount(
+      destinationAddress
     );
 
-    console.log("ACCOUNT:", account);
+    console.log(
+      "DESTINATION ACCOUNT:",
+      destinationAccount
+    );
 
     const {
       data: { session },
@@ -34,7 +38,7 @@ export default function SendMoneyPage() {
       .insert([
         {
           sender_id: user.id,
-          receiver_name: receiverName,
+          receiver_name: destinationAddress,
           amount: Number(amount),
           status: "Pending",
         },
@@ -44,7 +48,7 @@ export default function SendMoneyPage() {
       setMessage(error.message);
     } else {
       setMessage("Transaction saved successfully!");
-      setReceiverName("");
+      setDestinationAddress("");
       setAmount("");
     }
   };

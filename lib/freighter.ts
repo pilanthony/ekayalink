@@ -1,15 +1,20 @@
-import { isConnected } from "@stellar/freighter-api";
+import { requestAccess, getAddress } from "@stellar/freighter-api";
 
-export async function checkFreighter() {
+export async function connectFreighter() {
   try {
-    const result = await isConnected();
+    console.log("STEP 1");
 
-    console.log("FREIGHTER RESULT:", result);
+    const access = await requestAccess();
 
-    return result.isConnected;
+    console.log("ACCESS:", access);
+
+    const address = await getAddress();
+
+    console.log("ADDRESS:", address);
+
+    return address;
   } catch (error) {
     console.error("FREIGHTER ERROR:", error);
-
-    return false;
+    return null;
   }
 }

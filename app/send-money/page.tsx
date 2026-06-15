@@ -1,14 +1,23 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { server, loadAccount } from "@/lib/stellar";
 
 export default function SendMoneyPage() {
-  const [receiverName, setReceiverName] = useState("");
+  const router = useRouter();
+  const [destinationAddress, setDestinationAddress] = useState("");
   const [amount, setAmount] = useState("");
   const [message, setMessage] = useState("");
 
   const handleSendMoney = async () => {
+    const account = await loadAccount(
+      "GBCOMIMPXHBHW3WPBLFN5NQ4XQUL6XYZX3SBP7TFPK4VRPTSD4HCLJMD"
+    );
+
+    console.log("ACCOUNT:", account);
+
     const {
       data: { session },
     } = await supabase.auth.getSession();
@@ -42,6 +51,13 @@ export default function SendMoneyPage() {
 
   return (
     <main className="min-h-screen p-8">
+        <button
+        onClick={() => router.push("/dashboard")}
+        className="border rounded-lg px-4 py-2 mb-6"
+      >
+        ← Back to Dashboard
+      </button>
+
       <h1 className="text-4xl font-bold mb-6">
         Send Money
       </h1>
@@ -50,9 +66,9 @@ export default function SendMoneyPage() {
 
         <input
           type="text"
-          placeholder="Receiver Name"
-          value={receiverName}
-          onChange={(e) => setReceiverName(e.target.value)}
+          placeholder="Destination Wallet Address"
+          value={destinationAddress}
+          onChange={(e) => setDestinationAddress(e.target.value)}
           className="w-full border rounded-lg p-3"
         />
 

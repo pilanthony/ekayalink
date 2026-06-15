@@ -1,14 +1,17 @@
 "use client";
 
-import { checkFreighter } from "@/lib/freighter";
+import { connectFreighter } from "@/lib/freighter";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 export default function DashboardPage() {
   const [email, setEmail] = useState("");
+  const [publicKey, setPublicKey] = useState("");
   const [balance, setBalance] = useState(0);
   const [transactionCount, setTransactionCount] = useState(0);
+  
+  const [stellarAddress, setStellarAddress] = useState("");
   
   const [transactions, setTransactions] = useState<any[]>([]);
   const [freighterStatus, setFreighterStatus] = useState("");
@@ -22,18 +25,46 @@ export default function DashboardPage() {
     router.push("/login");
     };
 
-  
-  const handleCheckFreighter = async () => {
-  const installed = await checkFreighter();
+  const handleConnectWallet = async () => {
+  console.log("CONNECT BUTTON CLICKED");
 
-  if (installed) {
-    setFreighterStatus("Freighter Detected");
-  } else {
-    setFreighterStatus("Freighter Not Installed");
-  }
+  const result = await connectFreighter();
+
+  if (!result?.address) {
+  alert("No wallet address returned");
+  return;
+}
+
+const {
+  data: { session },
+} = await supabase.auth.getSession();
+
+const user = session?.user;
+
+if (!user) {
+  alert("User session not found");
+  return;
+}
+
+const { error } = await supabase
+  .from("wallets")
+  .update({
+    stellar_public_key: result.address,
+  })
+  .eq("user_id", user.id);
+
+if (error) {
+  console.error(error);
+  alert("Failed to save wallet");
+  return;
+}
+
+  console.log("RESULT:", result);
+
+  alert("Wallet Connected Successfully!");
+
 };
   
-
   useEffect(() => {
     async function loadUser() {
 const { data, error } = await supabase.auth.getSession();
@@ -60,7 +91,8 @@ if (!transactionsError) {
   setTransactions(transactionsData || []);
 }
 
-setEmail(user.email || "");
+  setEmail(user.email || "");
+ 
 
 const { data: wallets, error: walletError } = await supabase
   .from("wallets")
@@ -78,6 +110,7 @@ if (wallets && wallets.length > 0) {
   console.log("WALLET RECORD:", wallet);
 
   setBalance(Number(wallet.balance));
+  setStellarAddress(wallet.stellar_public_key || "");
   setStatus(`Wallet Found: ${wallet.balance}`);
 } else {
   setStatus("Wallet Not Found");
@@ -109,15 +142,33 @@ if (wallets && wallets.length > 0) {
 
       <div className="mt-4">
         <button
-          onClick={handleCheckFreighter}
+          onClick={handleConnectWallet}
           className="border rounded-lg px-4 py-2"
         >
-          Check Freighter
+          Connect Wallet
         </button>
+
+        <button
+            onClick={() => router.push("/send-money")}
+            className="border rounded-lg px-4 py-2 ml-2"
+          >
+            Send Money
+          </button>
 
         <p className="mt-2">
           {freighterStatus}
         </p>
+
+        <div className="mt-4 border rounded-lg p-4">
+          <h3 className="font-bold">
+            Stellar Wallet Address
+          </h3>
+
+          <p className="break-all mt-2">
+            {stellarAddress || "No wallet connected"}
+          </p>
+        </div>
+
       </div>
 
       <p className="mb-6">
@@ -155,6 +206,44 @@ if (wallets && wallets.length > 0) {
           </p>
         </div>
       </div>
+
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold mb-4">
+          Recent Transactions
+        </h2>
+
+        {transactions.length > 0 ? (
+            transactions.map((transaction) => (
+              <div
+                key={transaction.id}
+                className="border rounded-lg p-4 mb-4"
+              >
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="font-bold text-lg">
+                      {transaction.receiver_name}
+                    </p>
+
+                    <p className="text-sm">
+                      Status: {transaction.status}
+                    </p>
+                  </div>
+
+                  <div className="text-right">
+                    <p className="text-xl font-bold">
+                      ₱{transaction.amount}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p>No transactions found</p>
+          )}
+
+        
+      </div>
+
     </main>
   );
 }

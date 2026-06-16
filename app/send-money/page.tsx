@@ -64,15 +64,27 @@ export default function SendMoneyPage() {
 
     console.log("DESTINATION:", destinationAddress);
 
-  const destinationAccount = await loadAccount(
-      destinationAddress
-    );
+  try {
+    const destinationAccount = await loadAccount(
+    destinationAddress
+        );
 
-    console.log(
-      "DESTINATION ACCOUNT:",
-      destinationAccount
-    );
+      console.log(
+        "DESTINATION ACCOUNT:",
+        destinationAccount
+        );
+      } catch (error) {
+        console.error(
+          "DESTINATION ACCOUNT ERROR:",
+          error
+  );
 
+  setMessage(
+    "Destination wallet does not exist on Stellar Testnet."
+  );
+
+  return;
+}
     const transaction = new TransactionBuilder(
   senderAccount,
   {
@@ -114,6 +126,11 @@ const response = await server.submitTransaction(
 );
 
 console.log(
+  "TX HASH:",
+  response.hash
+);
+
+console.log(
   "SUBMIT RESPONSE:",
   response
 );
@@ -141,17 +158,25 @@ console.log(
           sender_id: user.id,
           receiver_name: destinationAddress,
           amount: Number(amount),
-          status: "Pending",
+          status: "Completed",
+          stellar_hash: response.hash,
         },
       ]);
 
-    if (error) {
-      setMessage(error.message);
-    } else {
-      setMessage("Transaction saved successfully!");
-      setDestinationAddress("");
-      setAmount("");
-    }
+          if (error) {
+        setMessage(error.message);
+      } else {
+        setMessage(
+          "Transaction completed successfully!"
+        );
+
+        setDestinationAddress("");
+        setAmount("");
+
+        setTimeout(() => {
+          router.push("/dashboard");
+        }, 1500);
+      }
   };
 
   return (

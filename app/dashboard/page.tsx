@@ -1,6 +1,11 @@
 "use client";
 
 import { connectFreighter } from "@/lib/freighter";
+import {
+  fundTestnetAccount,
+  getAccountBalance,
+} from "@/lib/stellar";
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -61,7 +66,13 @@ if (error) {
 
   console.log("RESULT:", result);
 
-  alert("Wallet Connected Successfully!");
+  setFreighterStatus(
+  "Wallet Connected Successfully!"
+);
+
+alert(
+  "Wallet Connected Successfully!"
+);
 
 };
   
@@ -109,9 +120,21 @@ if (wallets && wallets.length > 0) {
 
   console.log("WALLET RECORD:", wallet);
 
-  setBalance(Number(wallet.balance));
+  try {
+  const stellarBalance = await getAccountBalance(
+    wallet.stellar_public_key
+  );
+
+  setBalance(Number(stellarBalance));
+} catch (error) {
+  console.error(
+    "Balance fetch failed:",
+    error
+  );
+}
+
   setStellarAddress(wallet.stellar_public_key || "");
-  setStatus(`Wallet Found: ${wallet.balance}`);
+  setStatus(`Wallet Connected`);
 } else {
   setStatus("Wallet Not Found");
 }
@@ -182,7 +205,7 @@ if (wallets && wallets.length > 0) {
           </h2>
 
           <p className="text-2xl mt-2">
-            ₱{balance.toFixed(2)}
+            {balance.toFixed(2)} XLM
           </p>
         </div>
 
@@ -220,18 +243,36 @@ if (wallets && wallets.length > 0) {
               >
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="font-bold text-lg">
-                      {transaction.receiver_name}
-                    </p>
+                      <p className="font-bold text-lg">
+                        {transaction.receiver_name}
+                      </p>
 
-                    <p className="text-sm">
-                      Status: {transaction.status}
-                    </p>
-                  </div>
+                      <p className="text-sm">
+                        {transaction.status === "Completed"
+                          ? "✅ Completed"
+                          : "⏳ Pending"}
+                      </p>
 
+                     {transaction.stellar_hash && (
+                        <div className="mt-1">
+                          <p className="text-xs break-all">
+                            Hash: {transaction.stellar_hash}
+                          </p>
+
+                          <a
+                            href={`https://stellar.expert/explorer/testnet/tx/${transaction.stellar_hash}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs underline"
+                          >
+                            View on Stellar Explorer
+                          </a>
+                        </div>
+                      )}
+                    </div>
                   <div className="text-right">
                     <p className="text-xl font-bold">
-                      ₱{transaction.amount}
+                      {transaction.amount} XLM
                     </p>
                   </div>
                 </div>

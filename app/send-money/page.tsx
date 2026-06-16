@@ -48,13 +48,18 @@ export default function SendMoneyPage() {
 
   const senderAddress = await getWalletAddress();
 
+    if (!senderAddress) {
+    setMessage("Please connect your Freighter wallet first");
+    return;
+  }
+
     if (senderAddress?.address === destinationAddress) {
       setMessage("You cannot send money to your own wallet");
       return;
     }
 
     const senderAccount = await loadAccount(
-      senderAddress.address
+      senderAddress!.address
     );
 
     console.log(

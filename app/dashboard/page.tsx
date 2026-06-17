@@ -64,6 +64,9 @@ if (error) {
   return;
 }
 
+setStellarAddress(result.address);
+setStatus("Wallet Connected");
+
   console.log("RESULT:", result);
 
   setFreighterStatus(

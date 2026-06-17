@@ -5,14 +5,13 @@ import { useEffect, useState } from "react";
 
 export default function TestStellarPage() {
   const [publicKey, setPublicKey] = useState("");
-  const [secretKey, setSecretKey] = useState("");
+  
   const [balance, setBalance] = useState("0");
 
   useEffect(() => {
     const keypair = Keypair.random();
 
-    setPublicKey(keypair.publicKey());
-    setSecretKey(keypair.secret());
+     setPublicKey(keypair.publicKey());
   }, []);
 
   async function checkBalance() {
@@ -37,26 +36,65 @@ export default function TestStellarPage() {
 }
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>eKayaLink Stellar Test</h1>
+    <div
+        style={{
+          minHeight: "100vh",
+          background: "#000",
+          color: "#fff",
+          padding: "40px",
+        }}
+      >
+      
+      
+      <h1
+        style={{
+          fontSize: "32px",
+          fontWeight: "bold",
+          marginBottom: "20px",
+        }}
+      >
+        Stellar Testnet Wallet
+      </h1>
 
-      <p>
-        <strong>Public Key:</strong>
-      </p>
-      <p>{publicKey}</p>
+      <div style={{ marginBottom: "20px" }}>
+          <h3>Wallet Address</h3>
 
-      <p>
-        <strong>Secret Key:</strong>
-      </p>
-      <p>{secretKey}</p>
+          <div
+            style={{
+              background: "#111",
+              padding: "12px",
+              borderRadius: "8px",
+              wordBreak: "break-all",
+            }}
+          >
+            {publicKey}
+          </div>
+        </div>
 
-       <button onClick={checkBalance}>
-          Check Balance
-      </button>
+          <button
+            onClick={checkBalance}
+            style={{
+              padding: "12px 24px",
+              borderRadius: "8px",
+              cursor: "pointer",
+              marginTop: "10px",
+            }}
+          ></button>
 
-      <p>
-      <strong>XLM Balance:</strong> {balance}
-    </p>
+      <div
+          style={{
+            marginTop: "20px",
+            padding: "20px",
+            border: "1px solid #333",
+            borderRadius: "10px",
+          }}
+        >
+          <h3>Balance</h3>
+
+          <h1>{balance} XLM</h1>
+
+          <p>Stellar Testnet</p>
+        </div>
     </div>
   );
 }

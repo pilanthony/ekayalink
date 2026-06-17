@@ -46,14 +46,28 @@ export default function SendMoneyPage() {
     return;
   }
 
-  const senderAddress = await getWalletAddress();
+  const cleanDestination =
+  destinationAddress.trim();
+
+console.log(
+  "DESTINATION RAW:",
+  destinationAddress
+);
+
+console.log(
+  "DESTINATION CLEAN:",
+  cleanDestination
+);
+
+const senderAddress =
+  await getWalletAddress();  
 
     if (!senderAddress) {
     setMessage("Please connect your Freighter wallet first");
     return;
   }
 
-    if (senderAddress?.address === destinationAddress) {
+    if (senderAddress?.address === cleanDestination) {
       setMessage("You cannot send money to your own wallet");
       return;
     }
@@ -71,21 +85,21 @@ export default function SendMoneyPage() {
 
   try {
     const destinationAccount = await loadAccount(
-    destinationAddress
+    cleanDestination
         );
 
       console.log(
         "DESTINATION ACCOUNT:",
         destinationAccount
         );
-      } catch (error) {
+      } catch (error:any) {
         console.error(
           "DESTINATION ACCOUNT ERROR:",
           error
   );
 
   setMessage(
-    "Destination wallet does not exist on Stellar Testnet."
+    `Destination error: ${error?.message}`
   );
 
   return;
@@ -101,7 +115,7 @@ export default function SendMoneyPage() {
   .addOperation(
     Operation.payment({
       destination:
-        destinationAddress,
+        cleanDestination,
       asset: Asset.native(),
       amount:
         amount,
